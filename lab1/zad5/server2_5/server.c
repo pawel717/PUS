@@ -200,7 +200,7 @@ void* handleHTTPRequest(void * arg)
 
 char * createHTMLpage()
 {
-	char * page_HTML;
+	char page_HTML[512];
 	DIR * directory;
 	struct dirent * image;
 
