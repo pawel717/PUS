@@ -117,9 +117,9 @@ void* handleHTTPRequest(void * arg)
 
 	int received_bytes;
 
-	received_bytes = recv(server_fd, &request, sizeof(request), 0);
+	received_bytes = recv(context->client, &request, sizeof(request), 0);
 	if(received_bytes == -1)
-		Error("[SERVER]: Błąd! Nie można oderbrać wiadomosci");
+		Error("[SERVER]: Błąd! Nie można odebrać wiadomosci");
 	else if(received_bytes == 0)
 		Error("[SERVER]: Błąd! Nie otrzymano żadnych danych");
 
@@ -144,10 +144,10 @@ void* handleHTTPRequest(void * arg)
 		if(strchr(p,'/') == NULL) // request demands image
 		{
 			DIR * directory;
-			char * message;
+			char message[512];
 			struct dirent * image;
 
-			strcat(message, "HTTP/1.0 200 OK\n"
+			strcpy(message, "HTTP/1.0 200 OK\n"
 			                       "Content-Type: image\n"
 			                       "Content-Length:512\n"
 								   "\n" );//strcpy?
