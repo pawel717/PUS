@@ -29,7 +29,7 @@ void CloseServer();
 static void Error(char desc[]);
 char * createHTMLpage();
 void* handleHTTPRequest(void * context);
-int checkNewConnection();
+int checkNewConnections();
 
 struct context
 {
@@ -89,9 +89,11 @@ int main(int argc, char *argv[ ])
 		if (pthread_create(&thread_id, NULL, &handleHTTPRequest, (void*)&context) == -1)
 			Error("[SERWER]: Błąd! Nie utowrzono wątku...\n");
 	}
+
+	CloseServer();
 }
 
-int checkNewConnection()
+int checkNewConnections()
 {
 	char src[INET_ADDRSTRLEN];
 	struct sockaddr_in client_addr;
@@ -111,19 +113,87 @@ void* handleHTTPRequest(void * arg)
 	struct context * context = (struct context *) arg;
 
 	char request[2000];
+	char method[256], url[256], protocol[256];
 
 	int received_bytes;
 
 	received_bytes = recv(server_fd, &request, sizeof(request), 0);
-	//check if it is proper http request
+	if(received_bytes == -1)
+		Error("[SERVER]: Błąd! Nie można oderbrać wiadomosci");
+	else if(received_bytes == 0)
+		Error("[SERVER]: Błąd! Nie otrzymano żadnych danych");
 
+	//parse request
+	request[received_bytes] = '\0';
+	sscanf(request, "%s %s %s", method, url, protocol);
+	method[strlen(method)] = '\0';
+	url[strlen(url)] = '\0';
+	protocol[strlen(protocol)] = '\0';
+	//check if it is proper http request
+	if(strcmp(protocol, "HTTP/1.1") == 0)
+	{
+		char *p=(char*)malloc(strlen(url) - 1);
+		memset(p, 0, strlen(p));
+
+		int i;
+		for(i = 1; i < strlen(url); i++)
+			*(p+i-1) = url[i];
+
+		*(p+strlen(url) - 1) = '\0';
+
+		if(strchr(p,'/') == NULL) // request demands image
+		{
+			DIR * directory;
+			char * message;
+			struct dirent * image;
+
+			strcat(message, "HTTP/1.0 200 OK\n"
+			                       "Content-Type: image\n"
+			                       "Content-Length:512\n"
+								   "\n" );//strcpy?
+			strcat(message, "<html><body><center>");
+
+			if((directory = opendir("img/")) != NULL)
+			{
+				while((image = readdir(directory)) != NULL)
+				{
+					if(strstr(image->d_name, p) != NULL)
+					{
+						strcat(message, "<img src='");
+						strcat(message, image->d_name);
+						strcat(message, "'/></img><br/>");
+					}
+				}
+
+
+			}
+
+			strcat(message, "</center></body></html>");
+			message[strlen(message)] = '\0';
+			closedir(directory);
+
+			if (write(context->client, page_HTML, strlen(page_HTML)) < 0)
+						    Error("[SERVER]: Nie można wysłać wiadomości");
+
+		}
+		else // request needs html_page
+		{
+			if (write(context->client, page_HTML, strlen(page_HTML)) < 0)
+			    Error("[SERVER]: Nie można wysłać wiadomości");
+		}
+
+
+	}
 	//if GET demands image -> url starts with /img/ and ends with .jpeg, .jpg, .png, .gif?
 
 	//send image as respone
 
+
 	//else send header+page_HTML
 
-	send(context->client, page_HTML, sizeof(page_HTML));
+	//add header to
+
+	//send(context->client, page_HTML, sizeof(page_HTML));
 
 	return 0;
 }
@@ -134,19 +204,34 @@ char * createHTMLpage()
 	DIR * directory;
 	struct dirent * image;
 
+	//add header
+	strcat(page_HTML, "HTTP/1.0 200 OK\n"
+                       "Content-Type: image\n"
+                       "Content-Length:512\n"
+					   "\n" );//strcpy?
 	strcat(page_HTML, "<html><body><center>\n");
 
 	if((directory = opendir("img/")) != NULL)
 	{
+
 		while((image = readdir(directory)) != NULL)
 		{
-			strcat(page_HTML ,"<img src=”");
-			strcat(page_HTML, image->d_name);
-			strcat(page_HTML, "”></img><br/>\n");
+			 if (strstr(image->d_name, ".png") != NULL
+			     || strstr(image->d_name, ".jpg") != NULL
+				 || strstr(image->d_name, ".jpeg") != NULL
+				 || strstr(image->d_name, ".gif") != NULL)
+			{
+				strcat(page_HTML ,"<img src=”");
+				strcat(page_HTML, image->d_name);
+				strcat(page_HTML, "”></img><br/>\n");
+			}
 		}
 	}
 
 	strcat(page_HTML, "</center></body></html> ");
+	page_HTML[strlen(page_HTML)] = '\0';
+
+	close(directory);
 
 	return page_HTML;
 }
