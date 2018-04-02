@@ -57,7 +57,7 @@ int main(int argc, char *argv[ ])
 {
 	if (argc != 2)
 	{
-		fprintf(stderr, "Wywołanie: %s <adres IP lub nazwa domenowa>\n", argv[0]);
+		fprintf(stderr, "Wywołanie: %s <adres IP lub nazwa domenowa> \n", argv[0]);
 		system("pause");
 		exit(EXIT_FAILURE);
 	}
