@@ -18,6 +18,7 @@ void CloseServer();
 static void Error(char desc[]);
 
 int sock_fd;
+int client_fd;
 
 int main(int argc, char* argv[])
 {
@@ -67,9 +68,9 @@ int main(int argc, char* argv[])
 		memset(&client_addr, 0, sizeof(client_addr));
 	    int client_length = sizeof(client_addr);
 
-		int client = accept(sock_fd, (struct sockaddr *)&client_addr, &client_length);
+		client_fd = accept(sock_fd, (struct sockaddr *)&client_addr, &client_length);
 
-		if(client == -1)
+		if(client_fd == -1)
 			Error("[SERWER]: Nie udało się zaakceptować połaczenia");
 		else
 			printf("[SERWER]: Nowe połaczenie od klienta (adres: %s:%d)\n",
@@ -80,7 +81,7 @@ int main(int argc, char* argv[])
 		{
 			char message[256];
 
-			int received_bytes = recv(client, message, sizeof(message), 0);
+			int received_bytes = recv(client_fd, message, sizeof(message), 0);
 
 			if(received_bytes == -1)
 				Error("Nie udało się odebrać danych");
@@ -90,7 +91,7 @@ int main(int argc, char* argv[])
 
 			printf("[SERWER]: Odebrano: %s", message);
 
-			send(client, message, strlen(message), 0);
+			send(client_fd, message, strlen(message), 0);
 		}
 	}
 
@@ -100,6 +101,7 @@ void CloseServer()
 {
 	printf("[SERWER] Zamykanie serwera...\n");
    	close(sock_fd);
+   	close(client_fd);
   	exit(0);
 }
 
