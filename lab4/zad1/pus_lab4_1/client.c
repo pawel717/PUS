@@ -25,9 +25,9 @@ int sock_fd;
 int main(int argc, char* argv[])
 {
 
-	if(argc != 2)
+	if(argc != 3)
 	{
-		 fprintf(stderr, "Wywołanie: %s <IPv6 ADDRESS> <PORT> <INTERFACE>\n", argv[0]);
+		 fprintf(stderr, "Wywołanie: %s <IPv6 ADDRESS> <PORT>\n", argv[0]);
 		 system("pause");
 		 exit(EXIT_FAILURE);
 	}
@@ -72,17 +72,23 @@ int main(int argc, char* argv[])
 	while(1)
 	{
 		char message[256];
+		memset(message, '\0', sizeof(message) );
+
 
 		fgets(message, 256, stdin);
 
-		if(strlen(message) == 0)
-			CloseClient();
+		if(strlen(message) == 1)
+			CloseClient(); // blank message -> close association and terminate
+
+		printf("%d strlen\n", strlen(message));
 
 		send(sock_fd, message, sizeof(message), 0);
 
 		memset(message, '\0', sizeof(message) );
 
 		recv(sock_fd, message, sizeof(message), 0);
+
+		printf("[KLIENT]: Odebrano: %s", message);
 	}
 
 }
