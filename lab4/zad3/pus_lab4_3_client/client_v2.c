@@ -12,7 +12,8 @@
 #include <time.h>
 #define BUFF_SIZE 256
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
 
     int                     sockfd;
     int                     retval, bytes, slen, i, flags, stream;
