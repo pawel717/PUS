@@ -28,7 +28,8 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Invocation: %s <IP ADDRESS> <PORT NUMBER>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
-
+    
+    flags = 0 ;
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family         = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
     hints.ai_socktype       = SOCK_STREAM;
