@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     }
 
     struct addrinfo *iterator;
-    for(iterator=result_addresses; iterator!=NULL; iterator = iterator->ai_next)
+    for(iterator = result_addresses; iterator!=NULL; iterator = iterator->ai_next)
     {
     	sock_fd = socket(iterator->ai_family, iterator->ai_socktype, iterator->ai_protocol);
 
@@ -73,8 +73,8 @@ int main(int argc, char* argv[])
     	    if(setsockopt(sock_fd, IPPROTO_SCTP, SCTP_INITMSG, &initmsg, sizeof (initmsg)) != 0)
     	    	Error("[KLIENT]: Błąd przy ustawianiu opcji SCTP_INITMSG");
 
-    		if(connect(sock_fd, iterator->ai_addr, iterator->ai_addrlen) != -1)
-    			break;
+    		// if(connect(sock_fd, iterator->ai_addr, iterator->ai_addrlen) != -1)
+    		break;
     	}
 
     	close(sock_fd);
@@ -99,8 +99,17 @@ int main(int argc, char* argv[])
 	printf ("[KLIENT]: Ilość strumieni wychodzacych: %d\n", status.sstat_outstrms);
 	printf ("[KLIENT]: Ilość strumieni przychodzacych: %d\n", status.sstat_instrms);
 
+	// MSG
+	char message[256];
+    memset(message, '\0', sizeof(message) );
+	
+	sprintf(message, "Test");
+	
+	if(sctp_sendmsg(sock_fd, message, strlen(message), NULL, 0, 0, 0, 0, 0, 0) == -1)
+		Error("[SERWER]: Błąd wysyłania");
+
 	// receive date and time from different streams
-	int i;
+	/* int i;
     for (i = 0; i <2; i++)
     {
     	char message[256];
@@ -112,7 +121,7 @@ int main(int argc, char* argv[])
             printf ("[KLIENT]: Strumień %d odebrano: %s\n", sndrcvinfo.sinfo_stream, message);
 
     }
-
+	*/
 	// then terminate
 
 	CloseClient();

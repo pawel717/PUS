@@ -36,6 +36,9 @@ int main(int argc, char* argv[])
 
 	struct sctp_initmsg initmsg;
 
+	// MSG
+	struct sctp_sndrcvinfo sndrcvinfo;
+
     memset (&initmsg, 0, sizeof (initmsg));
     initmsg.sinit_num_ostreams = 2;
     initmsg.sinit_max_instreams = 2;
@@ -49,7 +52,7 @@ int main(int argc, char* argv[])
 	server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(server_port);
 
-    sock_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+    sock_fd = socket(AF_INET, SOCK_SEQPACKET, IPPROTO_SCTP);
 
     if (sock_fd == -1)
     	Error("[SERWER]: Nie moglem utworzyc gniazda.\n");
@@ -75,22 +78,29 @@ int main(int argc, char* argv[])
 	while(1)
 	{
 
-		char src[INET_ADDRSTRLEN];
-		struct sockaddr_in client_addr;
-		memset(&client_addr, 0, sizeof(client_addr));
-	    int client_length = sizeof(client_addr);
+		// char src[INET_ADDRSTRLEN];
+		// struct sockaddr_in client_addr;
+		// memset(&client_addr, 0, sizeof(client_addr));
+	    // int client_length = sizeof(client_addr);
 
-		client_fd = accept(sock_fd, (struct sockaddr *)&client_addr, &client_length);
+		// client_fd = accept(sock_fd, (struct sockaddr *)&client_addr, &client_length);
 
-		if(client_fd == -1)
+		/* if(client_fd == -1)
 			Error("[SERWER]: Nie udało się zaakceptować połaczenia");
 		else
 			printf("[SERWER]: Nowe połaczenie od klienta (adres: %s:%d)\n",
 					inet_ntop(client_addr.sin_family, &client_addr, src, sizeof(src)),
 					client_addr.sin_port);
+		*/ 
 
+		// MSG
 		char message[256];
-		memset(message, '\0', sizeof(message));
+        int retval = sctp_recvmsg(sock_fd, (void *) message, sizeof(message),(struct sockaddr *) NULL, 0, &sndrcvinfo, NULL);
+		
+		printf("[SERWER]: MSG: %s \n", message);
+
+		
+		/* memset(message, '\0', sizeof(message));
 
 		time_t t = time(NULL);
 		struct tm current_time = *localtime(&t);
@@ -109,6 +119,7 @@ int main(int argc, char* argv[])
 			Error("[SERWER]: Błąd wysyłania");
 
 		printf("[SERWER]: Wysłano czas\n");
+		*/
 
 	}
 
