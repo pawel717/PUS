@@ -94,19 +94,17 @@ int main(int argc, char* argv[])
 	// print association id, association state and number of in and out streams getsockopt(SCTP_STATUS)
     getsockopt(sock_fd, SOL_SCTP, SCTP_STATUS,(void *) &status, (socklen_t *) &status_len);
 
-	printf ("[KLIENT]: Id asocjacji %d\n", status.sstat_assoc_id);
-	printf ("[KLIENT]: Stan asocjacji: %d\n", status.sstat_state);
-	printf ("[KLIENT]: Ilość strumieni wychodzacych: %d\n", status.sstat_outstrms);
-	printf ("[KLIENT]: Ilość strumieni przychodzacych: %d\n", status.sstat_instrms);
-
 	// MSG
 	char message[256];
-    memset(message, '\0', sizeof(message) );
+	memset(message, '\0', sizeof(message) );
 	
 	sprintf(message, "Test");
-	
+		
 	if(sctp_sendmsg(sock_fd, message, strlen(message), NULL, 0, 0, 0, 0, 0, 0) == -1)
-		Error("[SERWER]: Błąd wysyłania");
+	{
+		printf("[KLIENT]: ERROR\n");
+		Error("[KLIENT]: Błąd wysyłania");
+	}
 
 	// receive date and time from different streams
 	/* int i;

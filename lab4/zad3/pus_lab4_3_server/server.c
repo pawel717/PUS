@@ -37,7 +37,9 @@ int main(int argc, char* argv[])
 	struct sctp_initmsg initmsg;
 
 	// MSG
-	struct sctp_sndrcvinfo sndrcvinfo;
+	struct sctp_sndrcvinfo 			sndrcvinfo;
+	struct sctp_event_subscribe 	events;
+    struct sctp_status      		status;
 
     memset (&initmsg, 0, sizeof (initmsg));
     initmsg.sinit_num_ostreams = 2;
@@ -75,6 +77,14 @@ int main(int argc, char* argv[])
 
 	printf("[SERWER]: Oczekuje na klientów...\n");
 
+	memset (&events, 0, sizeof (events));
+    events.sctp_data_io_event = 1;
+    int retval = setsockopt(sock_fd, SOL_SCTP, SCTP_EVENTS,(const void *) &events, sizeof (events));
+
+    int slen = sizeof(status);
+    retval = getsockopt(sock_fd, SOL_SCTP, SCTP_STATUS,(void *) &status, (socklen_t *) & slen);
+    
+
 	while(1)
 	{
 
@@ -91,11 +101,11 @@ int main(int argc, char* argv[])
 			printf("[SERWER]: Nowe połaczenie od klienta (adres: %s:%d)\n",
 					inet_ntop(client_addr.sin_family, &client_addr, src, sizeof(src)),
 					client_addr.sin_port);
-		*/ 
-
+		*/
+			
 		// MSG
 		char message[256];
-        int retval = sctp_recvmsg(sock_fd, (void *) message, sizeof(message),(struct sockaddr *) NULL, 0, &sndrcvinfo, NULL);
+        retval = sctp_recvmsg(sock_fd, (void *) message, sizeof(message),(struct sockaddr *) NULL, 0, &sndrcvinfo, NULL);
 		
 		printf("[SERWER]: MSG: %s \n", message);
 
