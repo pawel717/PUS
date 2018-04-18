@@ -24,6 +24,8 @@ int main(int argc, char** argv) {
     struct sctp_event_subscribe s_events;
     char                    buffer[BUFF_SIZE];
 
+    flags = 0;
+
     if (argc != 3) {
         fprintf(stderr, "Invocation: %s <IP ADDRESS> <PORT NUMBER>\n", argv[0]);
         exit(EXIT_FAILURE);
