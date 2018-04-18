@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 
     struct sctp_initmsg initmsg;
     initmsg.sinit_max_attempts = 5;
-    initmsg.sinit_max_instreams = 1;
+    initmsg.sinit_max_instreams = 2;
     initmsg.sinit_num_ostreams = 4;
 
     memset(&address_info, 0, sizeof(struct addrinfo));
